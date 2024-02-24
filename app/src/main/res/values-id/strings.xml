@@ -1,0 +1,45 @@
+<resources>
+    <string name="app_name">Note One Layer</string>
+    <string name="login">LOGIN</string>
+    <string name="prompt_email">Email</string>
+    <string name="prompt_noHp">Angka Random 11 s/d 12 digit</string>
+    <string name="action_sign_in">Masyuk</string>
+    <string name="action_sign_in_short">Sign in</string>
+    <string name="todo">TODO</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Data Berhasil di dapatkan, maaf nda punya json nya pak jadi izin pake punya bapak</string>
+    <string name="info">info</string>
+    <string name="infotext">Sekilas tentang applikasi</string>
+    <string name="isi_info">Aplikasi ini dibuat untuk memenuhi syarat kelulusan Assemen Mobile Programing \n \n Adapun Fitur-fitur aplikasi ini antarlain : \n -dapat menghitung perkalian \n -dapat melakukan simpan catatan sederhana, mengganti catatan, dan membagikan catatan anda</string>
+
+    <string name="Mainmenutext1">Fitur Hitung</string>
+    <string name="Mainmenutext2">Come on, Lets Try Count here  </string>
+    <string name="backinfo">back</string>
+    <string name="katakata1">Then You will see the result here</string>
+    <string name="tambah">X</string>
+    <string name="countbutton">Count</string>
+    <string name="button">Share</string>
+    <string name="nextpagesentence">Try to share this text</string>
+    <string name="buttonNext">CRUD note</string>
+    <string name="send_to">kiirim ke</string>
+    <string name="textviewAbout1">This Unit Test is created by non legendary codingers.</string>
+    <string name="textviewabout2">All right. Reserved 2021</string>
+    <string name="titleabout">Unit Test</string>
+    <string name="tentang_aplikasi">About App</string>
+    <string name="share">"Smoga kita jadi orang soleh"</string>
+    <string name="ketik_disini">Catatkan apa yang mau kamu catat...</string>
+    <string name="submitButton">Submit</string>
+    <string name="teksnya">teksnya : </string>
+    <string name="teks_catatan">Belum ada Catatan</string>
+    <string name="internetButton">Internet</string>
+    <string name="backbutton">Cancel</string>
+    <string name="clear_data">Clear All</string>
+    <string name="updateButton">Update</string>
+    <string name="kata2difieldupdate">Ubah catatan mu disini...</string>
+    <string name="datateks">Gagal Mengambil Data Cek Internet Anda</string>
+    <string name="help">Petunjuk</string>
+    <string name="tanggal_dibikin">tanggal dibikin</string>
+    <string name="tanggal_di_update">tanggal di update</string>
+
+
+</resources>

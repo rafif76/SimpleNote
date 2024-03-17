@@ -1,13 +1,27 @@
 package org.d3if4080.AppPertamaRafif.catatan
 
 import android.content.Intent
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.util.Log
+import android.view.Gravity
+import android.view.LayoutInflater
 import android.view.Menu
+import android.view.View
+import android.view.ViewGroup
+import android.view.animation.AnimationUtils
+import android.widget.PopupWindow
+import android.widget.SearchView
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -26,6 +40,11 @@ class NoteFullDisplayActivity : AppCompatActivity() {
     lateinit var binding: ActivityNoteFullDisplayBinding
 
     lateinit var noteAdapter: CatatanAdapter
+    lateinit var notenote : noteEntity
+
+
+    private lateinit var popupWindow: PopupWindow
+
 
     private val sdf = SimpleDateFormat("[dd-MM-yyyy] HH:mm:ss")
 
@@ -40,7 +59,8 @@ class NoteFullDisplayActivity : AppCompatActivity() {
         setContentView(binding.root)
         recyclerView()
 
-        Toast.makeText(applicationContext, "Info : Pilih teks untuk mengedit", Toast.LENGTH_SHORT).show()
+        Toast.makeText(applicationContext, "Info : Pilih teks untuk mengedit", Toast.LENGTH_SHORT)
+            .show()
 
 
 
@@ -48,17 +68,23 @@ class NoteFullDisplayActivity : AppCompatActivity() {
             clickClearAll()
         }
 
-        binding.imageButton.setOnClickListener{
+        binding.arrowUp.setOnClickListener {
+            val animation = AnimationUtils.loadAnimation(this,R.anim.decelerate)
+
+            binding.arrowUp.startAnimation(animation)
+
             startActivity(
-                    Intent(applicationContext,NoteActivity::class.java)
+                Intent(applicationContext, NoteActivity::class.java)
             )
             finish()
         }
 
+        searchWords()
+        touchingItems()
     }
 
 
-   /* fun clickSumbit() {
+    /* fun clickSumbit() {
 
         val date= Date()
         val tanggals = sdf.format(date)
@@ -86,6 +112,11 @@ class NoteFullDisplayActivity : AppCompatActivity() {
 
     fun clickClearAll() {
 
+        val animation = AnimationUtils.loadAnimation(this,R.anim.decelerate)
+
+        binding.buttoncleardata.startAnimation(animation)
+
+
         val alertDialog = AlertDialog.Builder(this)
         alertDialog.apply {
             setTitle("Konfirmasi")
@@ -105,22 +136,25 @@ class NoteFullDisplayActivity : AppCompatActivity() {
     }
 
 
-
     private fun recyclerView() {
         noteAdapter = CatatanAdapter(arrayListOf(), object : CatatanAdapter.OnAdapterListener {
             override fun onClick(note: noteEntity) {
                 //Toast.makeText(applicationContext, note.teks, Toast.LENGTH_LONG).show()
                 startActivity(
-                        Intent(applicationContext,EditActivity::class.java)
-                                .putExtra("intent_id" , note.id)
-                                .putExtra("tanggal_bikin", note.tanggalBikin)
+                    Intent(applicationContext, EditActivity::class.java)
+                        .putExtra("intent_id", note.id)
+                        .putExtra("tanggal_bikin", note.tanggalBikin)
                 )
 
             }
 
+
             override fun onDelete(note: noteEntity) {
-                apusDialogTanya(note)
+                kehed(note);
             }
+
+
+
 
             override fun onShare(note: noteEntity) {
 
@@ -137,6 +171,12 @@ class NoteFullDisplayActivity : AppCompatActivity() {
             }
 
             override fun onUpdate(note: noteEntity) {
+
+            }
+
+            override fun onHapticTouch(note: noteEntity, view: View) {
+                longPressPopUp(note, view)
+
 
             }
 
@@ -166,28 +206,212 @@ class NoteFullDisplayActivity : AppCompatActivity() {
         }
     }
 
-    private fun apusDialogTanya(note: noteEntity) {
-        val alertDialog = AlertDialog.Builder(this)
-        alertDialog.apply {
-            setTitle("Konfirmasi")
-            setMessage("Yakin mau hapus catatan ini ?")
-            setNegativeButton("Ngga") { dialogInterface, which -> dialogInterface.dismiss() }
-            setPositiveButton("Yap") { dialogInterface, which ->
-                dialogInterface.dismiss()
-                CoroutineScope(Dispatchers.IO).launch {
-                    db.noteDao().deleteData(note)
-                    reloadNoteAgain()
-                }
-            }
+    /* Unused function, since Swipe function works
+       private fun apusDialogTanya(note: noteEntity) {
+           val alertDialog = AlertDialog.Builder(this)
+           alertDialog.apply {
+               setTitle("Konfirmasi")
+               setMessage("Yakin mau hapus catatan ini ?")
+               setNegativeButton("Ngga") { dialogInterface, which -> dialogInterface.dismiss() }
+               setPositiveButton("Yap") { dialogInterface, which ->
+                   dialogInterface.dismiss()
+                   CoroutineScope(Dispatchers.IO).launch {
+                       db.noteDao().deleteData(note)
+                       reloadNoteAgain()
+                   }
+               }
 
-        }
-        alertDialog.show()
+           }
+           alertDialog.show()
 
-    }
+       }
+
+        */
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.opsi, menu)
         return super.onCreateOptionsMenu(menu)
+    }
+
+
+    private fun searchDatabase(query: String) {
+        val searchQuery = "%$query%"
+
+        // searchDatabase(searchQuery)
+
+        CoroutineScope(Dispatchers.IO).launch {
+            val notes = db.noteDao().searchDatabase(searchQuery)
+            withContext(Dispatchers.Main) {
+                noteAdapter.setData(notes)
+            }
+        }
+
+
+    }
+
+    private fun searchWords() {
+
+
+        // mau pake SearchView Itu sebenarnya opsional. kalo Langsung panggil bindingnya aja (binding.cariDataSearcview) Itu juga bisa.
+
+        binding.cariCatatanOnFullscreen.setOnQueryTextListener(object :
+            SearchView.OnQueryTextListener {
+            override fun onQueryTextChange(query: String?): Boolean {
+                if (query != null) {
+                    searchDatabase(query)
+                }
+
+                return true
+            }
+
+            override fun onQueryTextSubmit(submit: String?): Boolean {
+                if (submit != null) {
+                    searchDatabase(submit)
+                }
+                return true
+
+            }
+        })
+    }
+
+
+    private fun longPressPopUp(note: noteEntity, anchoreView: View) {
+
+        val layoutInflater = getSystemService(LAYOUT_INFLATER_SERVICE) as LayoutInflater
+        val popupView: View = layoutInflater.inflate(R.layout.popup_layout, null)
+
+        popupWindow = PopupWindow(
+            popupView,
+            ViewGroup.LayoutParams.WRAP_CONTENT,
+            ViewGroup.LayoutParams.WRAP_CONTENT,
+            true
+        )
+
+
+
+
+        popupWindow.showAtLocation(anchoreView, Gravity.CENTER, 0, 0)
+
+
+        val popupTextView: TextView = popupView.findViewById(R.id.noteText_popUp)
+        popupTextView.text = note.teks.toString()
+
+
+    }
+
+    private fun kehed (note: noteEntity) : noteEntity{
+
+        notenote = note
+
+        return  notenote
+    }
+
+    private fun touchingItems() {
+
+        val itemTouchHelper = ItemTouchHelper(object :
+            ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT) {
+
+            val background = ColorDrawable(Color.RED)
+
+
+            override fun onMove(
+                recyclerView: RecyclerView,
+                viewHolder: RecyclerView.ViewHolder,
+                target: RecyclerView.ViewHolder
+            ): Boolean {
+                return false
+
+            }
+
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+
+                val alertDialog = AlertDialog.Builder(this@NoteFullDisplayActivity)
+                alertDialog.apply {
+                    setTitle("Konfirmasi")
+                    setMessage("Yakin mau hapus catatan ini ?")
+                    setNegativeButton("Ngga") {
+                            dialogInterface, which ->
+                        dialogInterface.dismiss()
+                        noteAdapter.notifyDataSetChanged()
+
+
+                    }
+                    setPositiveButton("Yap") { dialogInterface, which ->
+                        dialogInterface.dismiss()
+                        CoroutineScope(Dispatchers.IO).launch {
+                            db.noteDao().deleteData(notenote)
+                            reloadNoteAgain()
+                        }
+                    }
+
+                }
+                alertDialog.show()
+
+
+            }
+            override fun onChildDraw(
+                c: Canvas,
+                recyclerView: RecyclerView,
+                viewHolder: RecyclerView.ViewHolder,
+                dX: Float,
+                dY: Float,
+                actionState: Int,
+                isCurrentlyActive: Boolean
+            ) {
+                // Menyusun background untuk swipe
+                val itemView = viewHolder.itemView
+                val backgroundCornerOffset = 20
+                val iconMargin = (itemView.height - backgroundCornerOffset * 2) / 4
+                val icon = ContextCompat.getDrawable(this@NoteFullDisplayActivity, R.drawable.ic_delete)
+                val iconLeft: Int
+                val iconRight: Int
+                val iconTop = itemView.top + (itemView.height - icon!!.intrinsicHeight) / 2
+                val iconBottom = iconTop + icon.intrinsicHeight
+
+                if (dX > 0) {
+                    // Swipe ke kanan
+                    background.setBounds(
+                        itemView.left,
+                        itemView.top,
+                        dX.toInt() + backgroundCornerOffset,
+                        itemView.bottom
+                    )
+                    iconLeft = itemView.left + iconMargin
+                    iconRight = itemView.left + iconMargin + icon.intrinsicWidth
+                } else {
+                    // Swipe ke kiri
+                    background.setBounds(
+                        itemView.right + dX.toInt() - backgroundCornerOffset,
+                        itemView.top,
+                        itemView.right,
+                        itemView.bottom
+                    )
+                    iconLeft = itemView.right - iconMargin - icon.intrinsicWidth
+                    iconRight = itemView.right - iconMargin
+                }
+
+                background.draw(c)
+                icon.setBounds(iconLeft, iconTop, iconRight, iconBottom)
+                icon.draw(c)
+
+                super.onChildDraw(
+                    c,
+                    recyclerView,
+                    viewHolder,
+                    dX,
+                    dY,
+                    actionState,
+                    isCurrentlyActive
+                )
+            }
+        })
+
+
+
+
+        itemTouchHelper.attachToRecyclerView(binding.recyclerView)
+
+
     }
 
 

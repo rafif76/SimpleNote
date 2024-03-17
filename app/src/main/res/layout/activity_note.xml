@@ -219,19 +219,19 @@
                     app:layout_constraintVertical_bias="0.0" />
 
                 <ImageButton
-                    android:id="@+id/imageButton"
+                    android:id="@+id/arrowUp"
                     android:layout_width="39dp"
                     android:layout_height="26dp"
                     app:layout_constraintBottom_toTopOf="@+id/card_view"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintHorizontal_bias="0.0"
-                    app:layout_constraintStart_toEndOf="@+id/imageButton2"
+                    app:layout_constraintStart_toEndOf="@+id/arrowDown"
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintVertical_bias="0.0"
  />
 
                 <ImageButton
-                    android:id="@+id/imageButton2"
+                    android:id="@+id/arrowDown"
                     android:layout_width="wrap_content"
                     android:layout_height="27dp"
                     app:layout_constraintBottom_toTopOf="@+id/card_view"

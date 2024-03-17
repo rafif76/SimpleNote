@@ -41,4 +41,8 @@ interface noteDao {
  //fun searchDatabase(searchQuery: String): List<noteEntity>
 
 
+
+    @Query("SELECT * FROM catatan WHERE teks LIKE :searchQuery OR tanggalBikin LIKE :searchQuery")
+    fun searchDatabase(searchQuery: String): List<noteEntity>
+
 }
